@@ -16,6 +16,8 @@ Full lifecycle: **create → compile → review → polish → verify.**
 | `tikz [file]` | TikZ diagram review and SVG extraction |
 | `excellence [file]` | Comprehensive multi-dimensional quality review |
 | `devils-advocate [file]` | Challenge slide design with pedagogical questions |
+| `visual-check [file]` | PDF-based visual verification of compiled slides |
+| `validate [file]` | Structural validation against skill constraints |
 
 ### Highlights
 
@@ -25,6 +27,11 @@ Full lifecycle: **create → compile → review → polish → verify.**
 - **Box overflow detection** — Beamer suppresses overflow warnings inside blocks; the skill catches them via visual audit
 - **Motivation before formalism** — every concept starts with "Why?" before "What?"
 - **TikZ precision** — mathematical accuracy enforced via `\pgfmathsetmacro` (no hardcoded approximations)
+- **Semantic color system** — colorblind-safe palette (`\pos{}`, `\neg{}`, `\HL{}`) with WCAG AA contrast (≥ 4.5:1)
+- **Timing allocation** — built-in slide-count heuristics for 5min lightning talks through 90min lectures
+- **Columns & layout rules** — enforced `columns[T]` patterns with gap/width constraints
+- **Backup slides** — automatic appendix section for anticipated Q&A
+- **Algorithm & code support** — `algorithm2e`, `listings`, `pgfplots` integration with per-slide line limits
 - **XeLaTeX only** — modern font handling, 16:9 aspect ratio, 10pt default
 
 ## Prerequisites
@@ -115,12 +122,20 @@ To change this, either:
 
 If you have a custom beamer preamble, header file, or theme, simply provide it. The skill will use yours instead of the built-in default.
 
+## Example
+
+The `test/` directory contains a real-world example: a 20-minute seminar presentation on zkAgent (zero-knowledge proof agents) generated from the paper `test/199.pdf`. Both the source `.tex` and compiled `.pdf` are included.
+
 ## File Structure
 
 ```
 beamer-skill/
 ├── beamer/
 │   └── SKILL.md      # The skill definition
+├── test/             # Example: zkAgent slides generated from a paper
+│   ├── 199.pdf
+│   ├── zkagent_slides.tex
+│   └── zkagent_slides.pdf
 ├── README.md
 └── LICENSE
 ```
