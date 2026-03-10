@@ -18,6 +18,7 @@ Full lifecycle: **create → compile → review → polish → verify.**
 | `devils-advocate [file]` | Challenge slide design with pedagogical questions |
 | `visual-check [file]` | PDF-based visual verification of compiled slides |
 | `validate [file]` | Structural validation against skill constraints |
+| `extract-figures [pdf]` | Extract figures from paper PDFs for direct inclusion in slides |
 
 ### Highlights
 
@@ -27,7 +28,8 @@ Full lifecycle: **create → compile → review → polish → verify.**
 - **Box overflow detection** — Beamer suppresses overflow warnings inside blocks; the skill catches them via visual audit
 - **Motivation before formalism** — every concept starts with "Why?" before "What?"
 - **TikZ precision** — mathematical accuracy enforced via `\pgfmathsetmacro` (no hardcoded approximations)
-- **Semantic color system** — colorblind-safe palette (`\pos{}`, `\neg{}`, `\HL{}`) with WCAG AA contrast (≥ 4.5:1)
+- **Semantic color system** — colorblind-safe palette (`\pos{}`, `\con{}`, `\HL{}`) with WCAG AA contrast (≥ 4.5:1)
+- **Figure extraction** — pull figures directly from paper PDFs via `pdf-mcp`, ready for `\includegraphics`
 - **Timing allocation** — built-in slide-count heuristics for 5min lightning talks through 90min lectures
 - **Columns & layout rules** — enforced `columns[T]` patterns with gap/width constraints
 - **Backup slides** — automatic appendix section for anticipated Q&A
@@ -53,18 +55,18 @@ sudo pacman -S texlive
 
 ### pdf-mcp (Recommended)
 
-Install [pdf-mcp](https://github.com/michaelneale/pdf-mcp) so Claude Code can read large PDFs (papers, references) directly:
+Install [pdf-mcp](https://github.com/michaelneale/pdf-mcp) so Claude Code can read large PDFs (papers, references) and extract figures directly:
 
 ```bash
 pip install pdf-mcp
 claude mcp add pdf-mcp --scope user pdf-mcp
 ```
 
-This enables the `create` action to read and analyze full research papers before generating slides.
+This enables the `create` action to analyze research papers and `extract-figures` to pull figures for slide inclusion.
 
 ## Installation
 
-### Option A: Install via `claude mcp add-skill` (Recommended)
+### Option A: Install via `claude skill add` (Recommended)
 
 ```bash
 claude skill add --url https://github.com/Noi1r/beamer-skill
@@ -87,6 +89,11 @@ Once installed, the skill is triggered automatically when you mention beamer, sl
 **Create a lecture from a paper:**
 ```
 Help me create a beamer presentation based on this paper: /path/to/paper.pdf
+```
+
+**Extract figures from a paper:**
+```
+Extract figures from /path/to/paper.pdf for my slides
 ```
 
 **Compile slides:**
@@ -122,20 +129,30 @@ To change this, either:
 
 If you have a custom beamer preamble, header file, or theme, simply provide it. The skill will use yours instead of the built-in default.
 
-## Example
+## Examples
 
-The `test/` directory contains a real-world example: a 20-minute seminar presentation on zkAgent (zero-knowledge proof agents) generated from the paper `test/199.pdf`. Both the source `.tex` and compiled `.pdf` are included.
+The `test/` directory contains real-world examples generated entirely by this skill:
+
+| Example | Topic | Type |
+|---------|-------|------|
+| `zkagent_slides` | zkAgent — zero-knowledge proof agents | Theoretical CS / cryptography |
+| `slides` | TWIST1⁺ FAP⁺ fibroblasts in Crohn's disease | Basic research (with extracted figures) |
+| `slides_EP` | Endoscopic papillectomy outcomes | Clinical retrospective study |
+
+Each example includes the source paper (PDF), the generated `.tex`, and the compiled `.pdf`. The `figures/` directory contains images extracted from the source papers via `extract-figures`.
 
 ## File Structure
 
 ```
 beamer-skill/
 ├── beamer/
-│   └── SKILL.md      # The skill definition
-├── test/             # Example: zkAgent slides generated from a paper
-│   ├── 199.pdf
-│   ├── zkagent_slides.tex
-│   └── zkagent_slides.pdf
+│   └── SKILL.md          # The skill definition
+├── test/                  # Real-world examples
+│   ├── 199.pdf            # Source paper (zkAgent)
+│   ├── zkagent_slides.*   # Generated slides
+│   ├── slides.*           # Crohn's disease fibrosis
+│   ├── slides_EP.*        # Endoscopic papillectomy
+│   └── figures/           # Extracted paper figures
 ├── README.md
 └── LICENSE
 ```

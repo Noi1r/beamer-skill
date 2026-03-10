@@ -11,3 +11,4 @@
 *.bbl
 *.blg
 *.vrb
+.DS_Store

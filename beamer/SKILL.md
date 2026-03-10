@@ -5,7 +5,7 @@ description: |
   Use when working on any Beamer .tex slide deck — creation, editing, compilation, proofreading,
   visual audit, pedagogical review, TikZ diagrams, or comprehensive quality check.
   Trigger words: beamer, slides, lecture, tikz, compile latex, proofread slides, slide review.
-argument-hint: "[action] [file] — actions: create, compile, review, audit, proofread, tikz, excellence, visual-check, validate"
+argument-hint: "[action] [file] — actions: create, compile, review, audit, proofread, tikz, excellence, visual-check, validate, extract-figures"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Task"]
 ---
 
@@ -41,7 +41,7 @@ When creating new slides, use this as the default preamble unless the user has a
 \definecolor{neutral}{gray}{0.55}          % muted context
 \definecolor{cbPurple}{HTML}{CC78BC}        % additional accent
 \newcommand{\pos}[1]{\textcolor{positive}{#1}}
-\newcommand{\neg}[1]{\textcolor{negative}{#1}}
+\newcommand{\con}[1]{\textcolor{negative}{#1}}
 \newcommand{\HL}[1]{\textcolor{emphasis}{#1}}
 ```
 
@@ -78,7 +78,7 @@ When creating new slides, use this as the default preamble unless the user has a
     - **Horizontal overflow**: never use `\qquad` inside a box; use `\quad` or `,`. If a display equation is wider than ~70% of `\textwidth` on a bare slide, reformat before placing inside a box.
     - **Beamer suppresses overfull warnings inside blocks** — zero compile warnings does NOT guarantee no visual overflow. Always visually verify every box in the PDF.
 11. **Reference slide** — the second-to-last slide (before Thank You) must be a **References** slide listing key cited works. Use `\begin{thebibliography}{9}` with `\small`. Include the primary paper and 3-5 most relevant references.
-12. **Color and contrast standards** — text-background contrast ratio ≥ 4.5:1 (WCAG AA). Never use red+green for binary contrasts (color blindness affects ~8% of men). Prefer blue+orange. Semantic color commands defined in preamble: `\pos{}` = positive/correct (blue), `\neg{}` = negative/limitation (orange), `\HL{}` = emphasis/key finding (green), `\textcolor{neutral}{}` = de-emphasized. These are color-blind safe. Limit total palette to 3-5 colors.
+12. **Color and contrast standards** — text-background contrast ratio ≥ 4.5:1 (WCAG AA). Never use red+green for binary contrasts (color blindness affects ~8% of men). Prefer blue+orange. Semantic color commands defined in preamble: `\pos{}` = positive/correct (blue), `\con{}` = negative/limitation (orange), `\HL{}` = emphasis/key finding (green), `\textcolor{neutral}{}` = de-emphasized. These are color-blind safe. Limit total palette to 3-5 colors.
 13. **Visual hierarchy in font sizes** — slide title: 20-24pt (beamer default), key findings/theorems: normal size with `\textbf`, supporting text: normal, labels/captions: `\small` minimum. Never use `\tiny` for any user-facing content.
 14. **Backup slides** — after the Thank You slide, include 3-5 backup slides for anticipated questions (detailed proofs, extended comparisons, additional experimental results). Use `\appendix` before backup section. Separate from main deck with a `\begin{frame}{Backup Slides}\end{frame}` divider. Backup slides should NOT count toward the timing allocation.
 15. **Columns layout** — use `\begin{columns}[T]` + `\column{W\textwidth}` for side-by-side content. Rules:
@@ -197,7 +197,7 @@ Produce a **detailed outline**. For each section:
 - **Telegraphic keywords**, not full sentences. Exception: one framing sentence per slide to set context.
 - **Formulas and analysis interleave tightly** — define a quantity, then immediately state its cost/property/implication on the same slide. Never isolate a formula on one slide and its analysis on the next.
 - **No conversational hedging** — never write "wait, not exactly", "actually, let me clarify", or similar. If a point needs qualification, state it precisely from the start.
-- **Use `\textbf{}` for key terms** on first introduction; use `\pos{...}` for positive properties, `\neg{...}` for drawbacks/limitations, `\HL{...}` for key findings (defined in preamble).
+- **Use `\textbf{}` for key terms** on first introduction; use `\pos{...}` for positive properties, `\con{...}` for drawbacks/limitations, `\HL{...}` for key findings (defined in preamble).
 
 ##### 3a-2. Opening and Closing Strategies
 
@@ -769,7 +769,8 @@ Challenge slide design with 5-7 specific pedagogical questions.
    doc = fitz.open('FILE.pdf')
    zoom = 200 / 72  # 200 DPI
    matrix = fitz.Matrix(zoom, zoom)
-   for i, page in enumerate(doc):
+   for i in range(len(doc)):
+       page = doc.load_page(i)
        pixmap = page.get_pixmap(matrix=matrix)
        pixmap.save(f'/tmp/slide-{i+1:03d}.jpg', output='jpeg')
    doc.close()
@@ -850,6 +851,92 @@ Challenge slide design with 5-7 specific pedagogical questions.
 
 Overall: PASS / PASS WITH WARNINGS / FAIL
 ```
+
+### 2.11 `extract-figures [pdf] [pages]`
+
+**Extract figures from a paper PDF and prepare them for inclusion in Beamer slides.**
+
+Use when the user wants to reuse figures from an existing paper (their own or a cited work) instead of redrawing in TikZ.
+
+#### Workflow
+
+1. **Identify target figures** — if user doesn't specify pages, use `mcp__pdf-mcp__pdf_get_toc` and `mcp__pdf-mcp__pdf_read_pages` to locate figures in the paper. Ask user which figures to extract if ambiguous.
+
+2. **Extract images** from specified pages:
+   ```
+   mcp__pdf-mcp__pdf_extract_images(path=PDF_PATH, pages=PAGES)
+   ```
+   This returns base64-encoded PNG images with dimensions.
+
+3. **Save to project** — decode and write each image to a `figures/` directory relative to the .tex file:
+   ```bash
+   mkdir -p figures
+   # Write base64 data to file
+   echo "BASE64_DATA" | base64 -d > figures/fig-LABEL.png
+   ```
+   Naming convention: `fig-<descriptive-label>.png` (e.g., `fig-architecture.png`, `fig-results-table.png`).
+
+4. **Generate LaTeX snippet** — output ready-to-paste code:
+
+   *Full-width figure:*
+   ```latex
+   \begin{frame}{Frame Title}
+     \begin{center}
+       \includegraphics[width=0.85\textwidth]{figures/fig-LABEL.png}
+     \end{center}
+     \vspace{-6pt}
+     {\small Source: \citet{author2024paper}}
+   \end{frame}
+   ```
+
+   *Figure + text side-by-side (columns layout):*
+   ```latex
+   \begin{frame}{Frame Title}
+     \begin{columns}[T]
+       \column{0.50\textwidth}
+         \includegraphics[width=\textwidth]{figures/fig-LABEL.png}
+         {\small Source: \citet{author2024paper}}
+       \column{0.45\textwidth}
+         Key observations:
+         \begin{itemize}
+           \item Point 1
+           \item Point 2
+         \end{itemize}
+     \end{columns}
+   \end{frame}
+   ```
+
+   *Two figures side-by-side (subfigure):*
+   ```latex
+   \begin{frame}{Frame Title}
+     \begin{figure}
+       \begin{subfigure}{0.48\textwidth}
+         \includegraphics[width=\textwidth]{figures/fig-LEFT.png}
+         \caption{(a) Description}
+       \end{subfigure}\hfill
+       \begin{subfigure}{0.48\textwidth}
+         \includegraphics[width=\textwidth]{figures/fig-RIGHT.png}
+         \caption{(b) Description}
+       \end{subfigure}
+     \end{figure}
+   \end{frame}
+   ```
+
+5. **Cropping guidance** — if the extracted image contains surrounding text or margins that should be removed, use the `trim` and `clip` options:
+   ```latex
+   \includegraphics[width=0.85\textwidth, trim=LEFT BOTTOM RIGHT TOP, clip]{figures/fig-LABEL.png}
+   ```
+   - Units are in `bp` (big points). Estimate from the image dimensions returned by `pdf_extract_images`.
+   - Common case: `trim=50 200 50 100, clip` to remove page margins and surrounding text.
+   - **Always visually verify** after compilation — cropping coordinates are estimates.
+
+#### Rules
+
+- **Always attribute** — include `{\small Source: ...}` below every extracted figure unless it's the user's own paper.
+- **Prefer vector** — if only a single clean figure is on a page, extraction quality is usually sufficient. For complex multi-figure pages, consider redrawing the key figure in TikZ for better quality and consistency.
+- **Resolution check** — if extracted image width < 800px, warn the user that it may appear pixelated on a projector. Suggest either finding a higher-resolution source or redrawing in TikZ.
+- **Don't extract tables** — tables from PDF rasterize poorly. Always recreate tables in LaTeX using `booktabs`.
+- **Preamble dependency** — ensure `\usepackage{graphicx}` is in the preamble (add if missing). If using subfigures, also ensure `\usepackage{subcaption}`.
 
 ---
 
