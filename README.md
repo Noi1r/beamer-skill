@@ -62,6 +62,12 @@ pip install pdf-mcp
 claude mcp add pdf-mcp --scope user pdf-mcp
 ```
 
+If you use a SOCKS proxy, also install `socksio` (required by `httpx` for SOCKS support):
+
+```bash
+pip install socksio
+```
+
 This enables the `create` action to analyze research papers and `extract-figures` to pull figures for slide inclusion.
 
 ## Installation
