@@ -55,7 +55,7 @@ sudo pacman -S texlive
 
 ### pdf-mcp (Recommended)
 
-Install [pdf-mcp](https://github.com/michaelneale/pdf-mcp) so Claude Code can read large PDFs (papers, references) and extract figures directly:
+Install [pdf-mcp](https://github.com/jztan/pdf-mcp) so Claude Code can read large PDFs (papers, references) and extract figures directly:
 
 ```bash
 pip install pdf-mcp
