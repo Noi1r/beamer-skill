@@ -6,7 +6,7 @@ description: |
   visual audit, pedagogical review, TikZ diagrams, or comprehensive quality check.
   Trigger words: beamer, slides, lecture, tikz, compile latex, proofread slides, slide review.
 argument-hint: "[action] [file] — actions: create, compile, review, audit, proofread, tikz, excellence, visual-check, validate, extract-figures"
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "Task"]
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"]
 ---
 
 # Beamer Slide Workflow

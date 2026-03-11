@@ -66,14 +66,6 @@ This enables the `create` action to analyze research papers and `extract-figures
 
 ## Installation
 
-### Option A: Install via `claude skill add` (Recommended)
-
-```bash
-claude skill add --url https://github.com/Noi1r/beamer-skill
-```
-
-### Option B: Manual install
-
 Clone the repo and copy the skill directory into your Claude Code skills folder:
 
 ```bash
@@ -81,6 +73,8 @@ git clone https://github.com/Noi1r/beamer-skill.git
 mkdir -p ~/.claude/skills
 cp -r beamer-skill/beamer ~/.claude/skills/
 ```
+
+Then restart Claude Code. The skill will be automatically detected.
 
 ## Usage
 
@@ -131,7 +125,7 @@ If you have a custom beamer preamble, header file, or theme, simply provide it. 
 
 ## Examples
 
-The `test/` directory contains real-world examples generated entirely by this skill:
+The `example/` directory contains real-world examples generated entirely by this skill:
 
 | Example | Topic | Type |
 |---------|-------|------|
@@ -147,7 +141,7 @@ Each example includes the source paper (PDF), the generated `.tex`, and the comp
 beamer-skill/
 ├── beamer/
 │   └── SKILL.md          # The skill definition
-├── test/                  # Real-world examples
+├── example/               # Real-world examples
 │   ├── 199.pdf            # Source paper (zkAgent)
 │   ├── zkagent_slides.*   # Generated slides
 │   ├── slides.*           # Crohn's disease fibrosis
