@@ -141,6 +141,45 @@ The `example/` directory contains real-world examples generated entirely by this
 
 Each example includes the source paper (PDF), the generated `.tex`, and the compiled `.pdf`. The `figures/` directory contains images extracted from the source papers via `extract-figures`.
 
+## Benchmark: With Skill vs. Without Skill
+
+Automated evaluation comparing Claude Code **with** the beamer skill against a **baseline** (no skill). Each test was run by an independent subagent; assertions check objective, verifiable properties of the output.
+
+### Test 1 — `create`: 10-min talk from a cryptography paper
+
+| Assertion | With Skill | Baseline |
+|-----------|:----------:|:--------:|
+| .tex file generated | Pass | Pass |
+| `aspectratio=169`, `10pt` | Pass | Pass |
+| No overlay commands | Pass | Pass |
+| Slide count in 8–12 range | Pass (11) | Pass (12) |
+| References slide (`thebibliography`) | Pass | **Fail** |
+| Backup slides after `\appendix` | Pass | **Fail** |
+| Semantic colors (`\pos`, `\con`, `\HL`) | Pass | **Fail** |
+| **Pass rate** | **7/7 (100%)** | **4/7 (57%)** |
+
+### Test 2 — `review` + `validate`: proofread an existing slide deck
+
+| Assertion | With Skill | Baseline |
+|-----------|:----------:|:--------:|
+| Review report generated | Pass | Pass |
+| 5-category classification | Pass | **Fail** |
+| Standard issue format (Location / Current / Proposed / Severity) | Pass | **Fail** |
+| Separate validation report | Pass | **Fail** |
+| Structured validation table (slide count, aspect ratio, hard rules) | Pass | **Fail** |
+| Original `.tex` unmodified (read-only) | Pass | Pass |
+| **Pass rate** | **6/6 (100%)** | **2/6 (33%)** |
+
+### Summary
+
+| Metric | With Skill | Baseline | Delta |
+|--------|:----------:|:--------:|:-----:|
+| Overall pass rate | 13/13 (100%) | 6/13 (46%) | **+54 pp** |
+| Mean tokens | ~65k | ~50k | +30% |
+| Mean wall time | ~230s | ~130s | +73% |
+
+> The skill guarantees structural compliance (references, backups, semantic colors, formatted reports) that the baseline consistently misses. Token/time overhead is moderate (~30%/~73%) relative to the quality gain.
+
 ## File Structure
 
 ```

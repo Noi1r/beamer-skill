@@ -2,11 +2,14 @@
 name: beamer
 description: |
   Beamer LaTeX slide workflow: create, compile, review, and polish academic presentations.
-  Use when working on any Beamer .tex slide deck — creation, editing, compilation, proofreading,
-  visual audit, pedagogical review, TikZ diagrams, or comprehensive quality check.
-  Trigger words: beamer, slides, lecture, tikz, compile latex, proofread slides, slide review.
-argument-hint: "[action] [file] — actions: create, compile, review, audit, proofread, tikz, excellence, visual-check, validate, extract-figures"
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"]
+  Use this skill whenever the user works on Beamer .tex slide decks, or asks to create slides,
+  make a presentation, prepare a lecture, build a talk, or generate PPT/幻灯片 from a paper.
+  Covers: creation, editing, compilation, proofreading, visual audit, pedagogical review,
+  TikZ diagrams, figure extraction, and comprehensive quality checks.
+  Trigger on: beamer, slides, lecture, presentation, seminar talk, conference talk, defense slides,
+  tikz, compile latex, proofread slides, slide review, 讨论班, 论文讲解, PPT, 幻灯片.
+argument-hint: "[action] [file] — actions: create, compile, review, audit, pedagogy, tikz, excellence, devils-advocate, visual-check, validate, extract-figures"
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "AskUserQuestion", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"]
 ---
 
 # Beamer Slide Workflow
@@ -30,6 +33,7 @@ When creating new slides, use this as the default preamble unless the user has a
 
 \usepackage{amsmath,amssymb,amsthm,booktabs,mathtools}
 \usepackage{stmaryrd}  % for \llbracket, \rrbracket
+\usepackage{graphicx}  % for \includegraphics (extracted figures)
 \usepackage{hyperref}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,decorations.pathreplacing}
@@ -389,7 +393,7 @@ After completing the full draft, enter the quality loop:
 ```
 
 **5a. Compilation**
-- 2-pass XeLaTeX compilation
+- 2-pass XeLaTeX compilation (bibtex not needed here — already resolved in Phase 3 batch compiles)
 - Check: errors, overfull hbox, undefined references
 - Open PDF for visual inspection
 
@@ -472,10 +476,10 @@ Read-only report, no file edits.
 | Category | What to check |
 |----------|---------------|
 | Grammar | Subject-verb, articles, prepositions, tense consistency |
-| Typos | Misspellings, search-replace artifacts, duplicated words |
+| Typos | Misspellings, search-replace artifacts, duplicated words, **unreplaced placeholders** (`[name]`, `[TODO]`, `[XXX]`, template remnants) |
 | Overflow | Long equations without `\resizebox`, too many items per slide |
-| Consistency | Citation format (`\citet`/`\citep`), notation, terminology, box usage |
-| Academic quality | Informal abbreviations, missing words, claims without citations |
+| Consistency | Citation format (`\citet`/`\citep`), notation, terminology, box usage, **denominator consistency** across slides |
+| Academic quality | Informal abbreviations, missing words, claims without citations, **ambiguous abbreviations** (same abbreviation for different terms) |
 
 **Report format per issue:**
 ```
@@ -728,13 +732,13 @@ Comprehensive multi-dimensional review. **Use the Agent tool to dispatch review 
 ### Recommended Next Steps
 ```
 
-**Quality score rubric:**
+**Quality score rubric** (for multi-agent `excellence` review — complements the numeric score in Phase 5 which is used during `create`):
 
 | Score | Critical issues | Medium issues | Meaning |
 |-------|----------------|---------------|---------|
-| Excellent | 0-2 | 0-5 | Ready to present |
-| Good | 3-5 | 6-15 | Minor refinements |
-| Needs Work | 6-10 | 16-30 | Significant revision |
+| Excellent | 0-2 | 0-5 | Ready to present (≈ Phase 5 score ≥ 90) |
+| Good | 3-5 | 6-15 | Minor refinements (≈ Phase 5 score 80-89) |
+| Needs Work | 6-10 | 16-30 | Significant revision (≈ Phase 5 score < 80) |
 | Poor | 11+ | 31+ | Major restructuring |
 
 ### 2.8 `devils-advocate [file]`
