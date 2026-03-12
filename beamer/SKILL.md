@@ -48,7 +48,7 @@ When creating new slides, use this as the default preamble unless the user has a
 **Rules:**
 - **Always `10pt`** — `11pt` or `12pt` produces oversized, sparse slides.
 - **Always `aspectratio=169`** — modern projectors are 16:9.
-- **Default presenter**: `\author{Presenter: Lizheng Wang}` and `\institute{Shanghai Jiao Tong University}`. Override only if user specifies otherwise.
+- **Default presenter**: `\author{Presenter: [name]}` and `\institute{Shanghai Jiao Tong University}`. Override only if user specifies otherwise.
 - If user provides a custom preamble, header file, or theme: use theirs.
 - Add domain-specific macros (e.g. `\newcommand{\F}{\mathbb{F}}`) as needed.
 - **Algorithm/code packages** (add only when needed):

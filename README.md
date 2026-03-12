@@ -117,7 +117,7 @@ Proofread /path/to/slides.tex
 
 The skill defaults to:
 ```latex
-\author{Presenter: Lizheng Wang}
+\author{Presenter: [name]}
 \institute{Shanghai Jiao Tong University}
 ```
 
