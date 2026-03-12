@@ -1,6 +1,8 @@
-# Beamer Skill for Claude Code
+# Beamer Skill
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill for creating, compiling, reviewing, and polishing academic **Beamer LaTeX** presentations.
+An AI coding assistant skill for creating, compiling, reviewing, and polishing academic **Beamer LaTeX** presentations.
+
+Supports **Claude Code**, **OpenAI Codex CLI**, **Google Antigravity**, and **VS Code** AI extensions (Copilot, Cline, Cursor).
 
 Full lifecycle: **create → compile → review → polish → verify.**
 
@@ -72,19 +74,92 @@ This enables the `create` action to analyze research papers and `extract-figures
 
 ## Installation
 
-Clone the repo and copy the skill directory into your Claude Code skills folder:
+Clone the repo first:
 
 ```bash
 git clone https://github.com/Noi1r/beamer-skill.git
+```
+
+### Claude Code
+
+Copy the skill directory into your Claude Code skills folder:
+
+```bash
 mkdir -p ~/.claude/skills
 cp -r beamer-skill/beamer ~/.claude/skills/
 ```
 
-Then restart Claude Code. The skill will be automatically detected.
+Restart Claude Code. The skill will be automatically detected and triggered when you mention beamer, slides, lecture, tikz, or related keywords.
+
+### OpenAI Codex CLI
+
+Copy `AGENTS.md` and `references/` into your project root:
+
+```bash
+cp beamer-skill/beamer/AGENTS.md your-project/AGENTS.md
+cp -r beamer-skill/beamer/references your-project/references
+```
+
+Codex CLI automatically reads `AGENTS.md` from the working directory. The main file contains core rules and action summaries; detailed workflows are in `references/` and referenced as needed.
+
+### Google Antigravity
+
+Antigravity is compatible with the `SKILL.md` format. Copy the skill directory:
+
+```bash
+mkdir -p ~/.claude/skills
+cp -r beamer-skill/beamer ~/.claude/skills/
+```
+
+The same `SKILL.md` used by Claude Code works with Antigravity without modification.
+
+### VS Code — GitHub Copilot
+
+Copy the Copilot instructions file into your project:
+
+```bash
+mkdir -p your-project/.github
+cp beamer-skill/.github/copilot-instructions.md your-project/.github/
+```
+
+Copilot Chat automatically reads `.github/copilot-instructions.md` and applies the rules during conversations.
+
+### VS Code — Cline
+
+Copy the Cline rules file into your project:
+
+```bash
+mkdir -p your-project/.clinerules
+cp beamer-skill/.clinerules/beamer.md your-project/.clinerules/
+```
+
+Cline automatically loads all files in `.clinerules/` as custom instructions.
+
+### VS Code — Cursor
+
+Copy the Cursor rules file into your project:
+
+```bash
+mkdir -p your-project/.cursor/rules
+cp beamer-skill/.cursor/rules/beamer.mdc your-project/.cursor/rules/
+```
+
+Cursor automatically loads `.mdc` files from `.cursor/rules/`. The `globs` field in the frontmatter ensures the rules activate for `.tex`, `.bib`, and `.sty` files.
+
+## Platform Comparison
+
+| Platform | Instruction file | Content level | Auto-trigger |
+|----------|-----------------|---------------|-------------|
+| Claude Code | `SKILL.md` | Full (~55KB) | Yes (keyword matching) |
+| Antigravity | `SKILL.md` | Full (~55KB) | Yes (keyword matching) |
+| Codex CLI | `AGENTS.md` + `references/` | Medium (~30KB total) | Yes (auto-reads AGENTS.md) |
+| VS Code Copilot | `.github/copilot-instructions.md` | Compact (~5KB) | Yes (auto-reads) |
+| VS Code Cline | `.clinerules/beamer.md` | Compact (~5KB) | Yes (auto-reads) |
+| VS Code Cursor | `.cursor/rules/beamer.mdc` | Compact (~5KB) | Yes (glob-triggered on .tex) |
 
 ## Usage
 
-Once installed, the skill is triggered automatically when you mention beamer, slides, lecture, tikz, or related keywords in Claude Code.
+Once installed, the skill is triggered automatically when you mention beamer, slides, lecture, tikz, or related keywords.
 
 **Create a lecture from a paper:**
 ```
@@ -122,8 +197,8 @@ The skill defaults to:
 ```
 
 To change this, either:
-- Tell Claude Code your name/affiliation when creating slides, or
-- Edit `beamer/SKILL.md` Section 0 (Reference Preamble) to set your own defaults
+- Tell the AI assistant your name/affiliation when creating slides, or
+- Edit the preamble section in the corresponding instruction file (`SKILL.md`, `AGENTS.md`, or the VS Code config)
 
 ### Custom Templates
 
@@ -185,13 +260,25 @@ Automated evaluation comparing Claude Code **with** the beamer skill against a *
 ```
 beamer-skill/
 ├── beamer/
-│   └── SKILL.md          # The skill definition
-├── example/               # Real-world examples
-│   ├── 199.pdf            # Source paper (zkAgent)
-│   ├── zkagent_slides.*   # Generated slides
-│   ├── slides.*           # Crohn's disease fibrosis
-│   ├── slides_EP.*        # Endoscopic papillectomy
-│   └── figures/           # Extracted paper figures
+│   ├── SKILL.md                    # Full skill (Claude Code / Antigravity)
+│   ├── AGENTS.md                   # Codex CLI main file
+│   └── references/                 # Codex CLI detailed rules
+│       ├── create-workflow.md      #   Phase 0-5 creation workflow
+│       ├── tikz-standards.md       #   TikZ quality standards & patterns
+│       └── review-actions.md       #   review/audit/pedagogy/excellence/validate
+├── .github/
+│   └── copilot-instructions.md     # VS Code Copilot
+├── .clinerules/
+│   └── beamer.md                   # VS Code Cline
+├── .cursor/
+│   └── rules/
+│       └── beamer.mdc              # VS Code Cursor
+├── example/                        # Real-world examples
+│   ├── 199.pdf                     # Source paper (zkAgent)
+│   ├── zkagent_slides.*            # Generated slides
+│   ├── slides.*                    # Crohn's disease fibrosis
+│   ├── slides_EP.*                 # Endoscopic papillectomy
+│   └── figures/                    # Extracted paper figures
 ├── README.md
 └── LICENSE
 ```
