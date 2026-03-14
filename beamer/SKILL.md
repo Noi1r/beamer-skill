@@ -3,11 +3,12 @@ name: beamer
 description: |
   Beamer LaTeX slide workflow: create, compile, review, and polish academic presentations.
   Use this skill whenever the user works on Beamer .tex slide decks, or asks to create slides,
-  make a presentation, prepare a lecture, build a talk, or generate PPT/幻灯片 from a paper.
+  make a presentation, prepare a lecture, build a talk, or generate Beamer slides from a paper.
   Covers: creation, editing, compilation, proofreading, visual audit, pedagogical review,
   TikZ diagrams, figure extraction, and comprehensive quality checks.
   Trigger on: beamer, slides, lecture, presentation, seminar talk, conference talk, defense slides,
-  tikz, compile latex, proofread slides, slide review, 讨论班, 论文讲解, PPT, 幻灯片.
+  tikz, compile latex, proofread slides, slide review, 讨论班, 论文讲解.
+  Do NOT trigger on: powerpoint, pptx, PPT, 做PPT — use the powerpoint-slides skill instead.
 argument-hint: "[action] [file] — actions: create, compile, review, audit, pedagogy, tikz, excellence, devils-advocate, visual-check, validate, extract-figures"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "AskUserQuestion", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"]
 ---
@@ -868,15 +869,14 @@ Use when the user wants to reuse figures from an existing paper (their own or a 
 
 2. **Extract images** from specified pages:
    ```
-   mcp__pdf-mcp__pdf_extract_images(path=PDF_PATH, pages=PAGES)
+   mcp__pdf-mcp__pdf_extract_images(path=PDF_PATH, pages=PAGES, output_dir="figures")
    ```
-   This returns base64-encoded PNG images with dimensions.
+   Uses `output_dir` to save images directly to `figures/` as PNG files (original resolution, zero token cost).
+   Returns `{page, index, width, height, format, file_path}` metadata only — no base64 data.
 
-3. **Save to project** — decode and write each image to a `figures/` directory relative to the .tex file:
+3. **Rename to descriptive names** following the naming convention:
    ```bash
-   mkdir -p figures
-   # Write base64 data to file
-   echo "BASE64_DATA" | base64 -d > figures/fig-LABEL.png
+   mv figures/page3_img0.png figures/fig-LABEL.png
    ```
    Naming convention: `fig-<descriptive-label>.png` (e.g., `fig-architecture.png`, `fig-results-table.png`).
 
