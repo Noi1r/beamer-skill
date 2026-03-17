@@ -69,14 +69,17 @@ When creating new slides, use this as the default preamble unless the user has a
 
 ## 1. HARD RULES (Non-Negotiable)
 
-1. **No overlays** — never use `\pause`, `\onslide`, `\only`, `\uncover`. Use multiple slides for progressive builds, color emphasis for attention.
+1. **No overlays** — never use `\pause`, `\onslide`, `\only`, `\uncover`. Use multiple slides for progressive builds, color emphasis for attention. **Common replacement patterns:**
+   - *Progressive formula build-up*: slide A shows the base equation, slide B copies it and adds the next term (grayed-out terms from slide A stay as context). Copy-paste the full frame and extend.
+   - *Step-by-step list reveal*: slide A shows items 1-2, slide B shows 1-4 (items 1-2 repeated). Use `\textcolor{neutral}{}` on previously-shown items to mute them.
+   - *Diagram incremental build*: slide A shows the base structure, slide B adds annotations/edges. Duplicate the `tikzpicture` and append new elements — never delete prior elements.
 2. **Max 2 colored boxes per slide** — more dilutes emphasis. Demote transitional remarks to plain italic.
 3. **Motivation before formalism** — every concept starts with "Why?" before "What?".
 4. **Worked example within 2 slides** of every definition.
 5. **XeLaTeX only** — never pdflatex.
 6. **Beamer .tex is the single source of truth** — TikZ diagrams, content, notation all originate here.
 7. **Verify after every task** — compile, check warnings, open PDF.
-8. **Telegraphic style** — keyword phrases, not full sentences. Slides are speaker prompts, not manuscripts. Exception: framing sentences that set up a definition or transition.
+8. **Telegraphic style** — keyword phrases, not full sentences. Slides are speaker prompts, not manuscripts. Exception: framing sentences that set up a definition or transition. Each bullet item should be ≤2 lines (~15 words) — if longer, split into sub-items or rewrite more concisely.
 9. **Every slide earns its place** — each slide must contain at least one substantive element (formula, diagram, table, theorem, or algorithm). A slide with only 3 short bullets and nothing else must be merged or enriched.
 10. **Box-interior overflow guard** — `alertblock`, `exampleblock`, and `block` environments add internal padding (~15% less width, ~12-16pt extra height for title bar + vertical padding). Content that fits on a bare slide can overflow inside a box in **both directions**. Rules:
     - **Vertical overflow** (most common, hardest to detect): display math (`\[ \]`) + text below it inside a single box easily exceeds vertical capacity. Limit box content to **one display equation OR 2-3 short bullet items** — not both. Never use aggressive `\vspace{-Xpt}` inside a box; it pulls bottom content past the border.
@@ -85,7 +88,12 @@ When creating new slides, use this as the default preamble unless the user has a
 11. **Reference slide** — the second-to-last slide (before Thank You) must be a **References** slide listing key cited works. Use `\begin{thebibliography}{9}` with `\small`. Include the primary paper and 3-5 most relevant references.
 12. **Color and contrast standards** — text-background contrast ratio ≥ 4.5:1 (WCAG AA). Never use red+green for binary contrasts (color blindness affects ~8% of men). Prefer blue+orange. Semantic color commands defined in preamble: `\pos{}` = positive/correct (blue), `\con{}` = negative/limitation (orange), `\HL{}` = emphasis/key finding (green), `\textcolor{neutral}{}` = de-emphasized. These are color-blind safe. Limit total palette to 3-5 colors.
 13. **Visual hierarchy in font sizes** — slide title: 20-24pt (beamer default), key findings/theorems: normal size with `\textbf`, supporting text: normal, labels/captions: `\small` minimum. Never use `\tiny` for any user-facing content.
-14. **Backup slides** — after the Thank You slide, include 3-5 backup slides for anticipated questions (detailed proofs, extended comparisons, additional experimental results). Use `\appendix` before backup section. Separate from main deck with a `\begin{frame}{Backup Slides}\end{frame}` divider. Backup slides should NOT count toward the timing allocation.
+14. **Backup slides** — after the Thank You slide, include 3-5 backup slides for anticipated questions. Use `\appendix` before backup section. Separate from main deck with a `\begin{frame}{Backup Slides}\end{frame}` divider. Backup slides should NOT count toward the timing allocation. **Content to include** (derive from Phase 0 material analysis):
+    - Full proof of the main theorem (if only a sketch was shown in the main deck)
+    - Parameter choices / security analysis details (for crypto/protocol papers)
+    - Extended comparison table with additional baselines
+    - Experimental setup details (hardware, hyperparameters, datasets)
+    - Definitions of prerequisites that were assumed known (in case someone asks)
 15. **Columns layout** — use `\begin{columns}[T]` + `\column{W\textwidth}` for side-by-side content. Rules:
     - Comparison / parallel content: two columns at `0.48\textwidth` each (leave 0.04 gap).
     - Figure + text: figure column `0.45-0.55`, text column `0.40-0.50`, gap `0.05`.
@@ -142,6 +150,9 @@ Conduct a **content-driven interview** via AskUserQuestion. The questions below 
 **Minimum required questions** (always ask):
 1. **Duration**: How long is the presentation?
 2. **Audience level**: Who are the listeners?
+
+**Optional question** (ask when the talk is a journal club, defense, or user seems to want rehearsal support):
+3. **Speaker notes**: Would you like speaker notes in the Presenter View? If yes, `\note{}` blocks will be added per frame with telegraphic talking points (key message, transition cue, anticipated questions). Requires adding `\setbeameroption{show notes on second screen=right}` to the preamble for dual-screen display.
 
 **Content-driven questions** (derive from Phase 0, ask as many as needed):
 - **Prerequisite knowledge**: List concrete technical dependencies identified in Phase 0. Ask which ones the audience knows. E.g., "The paper builds on sumcheck and polynomial commitments. Should I review these?" — not "familiar with basic algebra?".
@@ -290,14 +301,20 @@ Every slide must have a clear **takeaway** — the one thing the audience should
 ##### 3d. Batch Workflow
 
 - Work in batches of 5-10 slides, following the approved structure
+- After each batch, **compile** (`xelatex -interaction=nonstopmode`) to catch errors early — fixing 2 issues in a 10-slide batch is far cheaper than fixing 12 issues in a 40-slide deck at Phase 5
 - After each batch, self-check: notation consistency, density constraints, motivation-before-formalism
-- Continue to next batch only after current batch passes self-check
+- Continue to next batch only after current batch compiles cleanly and passes self-check
 
 ##### 3e. Table Best Practices
 
 - Always use `booktabs` (`\toprule`, `\midrule`, `\bottomrule`) — never vertical lines (`|`).
 - Column alignment: numbers right-aligned (`r`), text left-aligned (`l`), short labels centered (`c`).
-- Max 6-7 columns, 8-10 rows per slide. More → split across slides or use highlighting to show subset.
+- Max 6-7 columns, 8-10 rows per slide. More → split across slides following these pagination rules:
+  - Each continuation slide repeats the full header row (`\toprule` + header + `\midrule`).
+  - Append " (cont'd)" to the frame title: `\frametitle{Results (cont'd)}`.
+  - Split at logical row group boundaries (e.g., between algorithm families, dataset groups) — never mid-group.
+  - Last page must have ≥3 data rows; if fewer, merge with the previous page.
+  - Each page gets its own takeaway line below the table if the subset tells a different story.
 - Use `\resizebox{\textwidth}{!}{...}` only as last resort — prefer reducing columns/rows first.
 - Highlight key cells with `\cellcolor{positive!15}` or `\textbf{}` — draw the eye to the result.
 - For comparison tables: bold the best result in each row/column.
