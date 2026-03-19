@@ -307,6 +307,8 @@ Every slide must have a clear **takeaway** — the one thing the audience should
 
 ##### 3e. Table Best Practices
 
+- **Always center tables** — wrap every standalone table in `\begin{center}...\end{center}`. Left-aligned tables look misaligned on slides.
+- **Never place a table immediately after the frame title** — themes like Madrid have a colored title bar whose bottom edge visually merges with `\toprule`, making the table appear embedded in the title. Always insert `\vspace{4pt}` (or introductory text) between the title and the first `\toprule`. The compiler emits **zero warnings** for this — it can only be caught by visual inspection.
 - Always use `booktabs` (`\toprule`, `\midrule`, `\bottomrule`) — never vertical lines (`|`).
 - Column alignment: numbers right-aligned (`r`), text left-aligned (`l`), short labels centered (`c`).
 - Max 6-7 columns, 8-10 rows per slide. More → split across slides following these pagination rules:
@@ -436,6 +438,8 @@ After completing the full draft, enter the quality loop:
 - [ ] **All marked points lie on their curves** — for every `\fill`, `\node`, or `\draw` endpoint that should be on a plotted curve, verify the y-coordinate is computed via `\pgfmathsetmacro` from the same function, NOT hardcoded. Visually check in PDF that dots/markers visually sit on the curve line
 - [ ] **Dashed reference lines terminate at the curve** — vertical/horizontal guide lines should end exactly where they meet the curve, not at arbitrary y-values
 - [ ] Tables fit within slide width
+- [ ] All standalone tables are centered (`\begin{center}...\end{center}`)
+- [ ] No table's `\toprule` visually merges with the title bar (add `\vspace{4pt}` or text before first table)
 - [ ] Font sizes in TikZ ≥ `\footnotesize`
 - [ ] Consistent styling across all diagrams
 
@@ -459,6 +463,8 @@ Start at 100. Deduct:
 | Major | Sparse slide (≤3 items, no math/diagram) | -5 per slide |
 | Major | TikZ label overlap | -5 |
 | Major | Missing references slide | -5 |
+| Major | Table not centered (standalone table without `\begin{center}`) | -3 per table |
+| Major | Table `\toprule` visually merged with title bar (no spacing after frame title) | -5 per slide |
 | Major | Notation inconsistency | -3 |
 | Minor | `\vspace` overuse (>3 per slide) | -1 |
 | Minor | Font size reduction (`\footnotesize` etc.) | -1 per slide |
@@ -480,7 +486,7 @@ Start at 100. Deduct:
 [ ] Max 2 colored boxes per slide
 [ ] No sparse slides (all slides have substantive content)
 [ ] TikZ diagrams visually verified — no overlaps, no overflow, all marked points on curves
-[ ] Tables fit within slide boundaries
+[ ] Tables fit within slide boundaries, are centered, and separated from title bar
 [ ] No content overflow inside colored boxes (visual PDF check)
 [ ] References slide present (second-to-last, before Thank You)
 ```
@@ -789,13 +795,15 @@ Challenge slide design with 5-7 specific pedagogical questions.
    ```python
    import fitz
    doc = fitz.open('FILE.pdf')
+   n = doc.page_count          # cache before iterating or closing
    zoom = 200 / 72  # 200 DPI
    matrix = fitz.Matrix(zoom, zoom)
-   for i in range(len(doc)):
+   for i in range(n):
        page = doc.load_page(i)
        pixmap = page.get_pixmap(matrix=matrix)
        pixmap.save(f'/tmp/slide-{i+1:03d}.jpg', output='jpeg')
    doc.close()
+   print(f'Exported {n} slides')
    ```
    Or via bash: `python3 -c "import fitz; ..."`
 
