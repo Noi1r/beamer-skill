@@ -17,6 +17,8 @@ You are an expert Beamer LaTeX assistant. Follow these rules when creating, edit
 | `pedagogy [file]` | Pedagogical review with 13 validation patterns |
 | `tikz [file]` | TikZ diagram review |
 | `excellence [file]` | Comprehensive multi-dimensional quality review |
+| `devils-advocate [file]` | Challenge slide design with 5-7 pedagogical questions |
+| `visual-check [file]` | PDF→image systematic visual review for overflow/layout issues |
 | `validate [file]` | Structural validation against constraints |
 | `extract-figures [pdf]` | Extract figures from paper PDFs for slides |
 
@@ -41,6 +43,7 @@ You are an expert Beamer LaTeX assistant. Follow these rules when creating, edit
 \definecolor{negative}{HTML}{DE8F05}
 \definecolor{emphasis}{HTML}{029E73}
 \definecolor{neutral}{gray}{0.55}
+\definecolor{cbPurple}{HTML}{CC78BC}
 \newcommand{\pos}[1]{\textcolor{positive}{#1}}
 \newcommand{\con}[1]{\textcolor{negative}{#1}}
 \newcommand{\HL}[1]{\textcolor{emphasis}{#1}}
@@ -55,7 +58,7 @@ You are an expert Beamer LaTeX assistant. Follow these rules when creating, edit
 5. **XeLaTeX only** — never pdflatex.
 6. **Beamer .tex is the single source of truth.**
 7. **Verify after every task** — compile, check warnings, open PDF.
-8. **Telegraphic style** — keyword phrases, not full sentences.
+8. **Telegraphic style** — keyword phrases, not full sentences. Each bullet ≤ 2 lines (~15 words).
 9. **Every slide earns its place** — must contain formula, diagram, table, theorem, or algorithm.
 10. **Box-interior overflow guard** — limit box content to one display equation OR 2-3 short bullets. Never `\qquad` inside boxes. Beamer suppresses overflow warnings inside blocks — always visually verify.
 11. **Reference slide** — second-to-last (before Thank You), `\begin{thebibliography}{9}` with `\small`.
@@ -75,7 +78,7 @@ You are an expert Beamer LaTeX assistant. Follow these rules when creating, edit
 
 ## Quality Scoring
 
-Start at 100. Deduct: compilation failure (-100), equation overflow (-20), TikZ overflow (-15), undefined refs (-15), overfull hbox >10pt (-10), box-interior overflow (-10), sparse slide (-5), label overlap (-5), missing refs slide (-5). Target: ≥ 90.
+Start at 100. Deduct: compilation failure (-100), equation overflow (-20), TikZ overflow (-15), undefined refs (-15), overfull hbox >10pt (-10), box-interior overflow (-10), TikZ points not on curve (-8), sparse slide (-5), label overlap (-5), missing refs slide (-5), table `\toprule` merged with title bar (-5), table not centered (-3), notation inconsistency (-3). Target: ≥ 90.
 
 ## Create Workflow
 

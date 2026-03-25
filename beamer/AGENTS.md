@@ -217,6 +217,8 @@ Start at 100. Deduct per issue:
 | Major | Sparse slide (≤3 items, no math/diagram) | -5 per slide |
 | Major | TikZ label overlap | -5 |
 | Major | Missing references slide | -5 |
+| Major | Table `\toprule` visually merged with title bar (no spacing after frame title) | -5 per slide |
+| Major | Table not centered (standalone table without `\begin{center}`) | -3 per table |
 | Major | Notation inconsistency | -3 |
 | Minor | `\vspace` overuse (>3 per slide) | -1 |
 | Minor | Font size reduction (`\footnotesize` etc.) | -1 per slide |

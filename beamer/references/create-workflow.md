@@ -26,6 +26,9 @@ Conduct a content-driven interview. The questions below are the **minimum requir
 1. **Duration**: How long is the presentation?
 2. **Audience level**: Who are the listeners?
 
+**Optional question** (ask when the talk is a journal club, defense, or user seems to want rehearsal support):
+3. **Speaker notes**: Would you like speaker notes in Presenter View? If yes, `\note{}` blocks will be added per frame with telegraphic talking points. Requires `\setbeameroption{show notes on second screen=right}` in preamble.
+
 **Content-driven questions** (derive from Phase 0, ask as many as needed):
 - **Prerequisite knowledge**: List concrete technical dependencies. E.g., "The paper builds on sumcheck and polynomial commitments. Should I review these?"
 - **Content scope**: Offer the paper's actual components as options. Ask which to emphasize, skip, or briefly mention.
@@ -166,14 +169,23 @@ Each math-heavy slide should follow one of these patterns:
 ### 3d. Batch Workflow
 
 - Work in batches of 5-10 slides, following the approved structure
+- After each batch, **compile** (`xelatex -interaction=nonstopmode`) to catch errors early — fixing 2 issues in a 10-slide batch is far cheaper than fixing 12 issues in a 40-slide deck at Phase 5
 - After each batch: self-check notation consistency, density constraints, motivation-before-formalism
-- Continue only after current batch passes self-check
+- Continue to next batch only after current batch compiles cleanly and passes self-check
 
 ### 3e. Table Best Practices
 
+- **Always center tables** — wrap every standalone table in `\begin{center}...\end{center}`. Left-aligned tables look misaligned on slides.
+- **Never place a table immediately after the frame title** — themes like Madrid have a colored title bar whose bottom edge visually merges with `\toprule`, making the table appear embedded in the title. Always insert `\vspace{4pt}` (or introductory text) between the title and the first `\toprule`. The compiler emits **zero warnings** for this — it can only be caught by visual inspection.
 - Always `booktabs` (`\toprule`, `\midrule`, `\bottomrule`) — never vertical lines.
 - Numbers right-aligned, text left-aligned, short labels centered.
-- Max 6-7 columns, 8-10 rows per slide.
+- Max 6-7 columns, 8-10 rows per slide. More → split across slides following these pagination rules:
+  - Each continuation slide repeats the full header row (`\toprule` + header + `\midrule`).
+  - Append " (cont'd)" to the frame title: `\frametitle{Results (cont'd)}`.
+  - Split at logical row group boundaries — never mid-group.
+  - Last page must have ≥3 data rows; if fewer, merge with the previous page.
+  - Each page gets its own takeaway line below the table if the subset tells a different story.
+- Use `\resizebox{\textwidth}{!}{...}` only as last resort — prefer reducing columns/rows first.
 - Highlight key cells with `\cellcolor{positive!15}` or `\textbf{}`.
 - For comparison tables: bold the best result in each row/column.
 
@@ -261,6 +273,8 @@ Always set explicit `width` and `height` to prevent overflow.
 - [ ] All marked points lie on their curves (computed via `\pgfmathsetmacro`)
 - [ ] Dashed reference lines terminate at the curve
 - [ ] Tables fit within slide width
+- [ ] All standalone tables are centered (`\begin{center}...\end{center}`)
+- [ ] No table's `\toprule` visually merges with the title bar (add `\vspace{4pt}` or text before first table)
 - [ ] Font sizes in TikZ ≥ `\footnotesize`
 
 *Notation:*
@@ -285,8 +299,8 @@ Fix all critical and major issues. Re-compile. Max 3 rounds.
 [ ] Every definition has motivation + worked example
 [ ] Max 2 colored boxes per slide
 [ ] No sparse slides
-[ ] TikZ diagrams visually verified
-[ ] Tables fit within slide boundaries
-[ ] No box-interior overflow
+[ ] TikZ diagrams visually verified — no overlaps, no overflow, all marked points on curves
+[ ] Tables fit within slide boundaries, are centered, and separated from title bar
+[ ] No content overflow inside colored boxes (visual PDF check)
 [ ] References slide present (second-to-last)
 ```

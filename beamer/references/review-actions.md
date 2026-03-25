@@ -198,13 +198,15 @@ PDF-based visual verification. Converts compiled PDF to images, then reviews eac
    ```python
    import fitz
    doc = fitz.open('FILE.pdf')
+   n = doc.page_count          # cache before iterating or closing
    zoom = 200 / 72  # 200 DPI
    matrix = fitz.Matrix(zoom, zoom)
-   for i in range(len(doc)):
+   for i in range(n):
        page = doc.load_page(i)
        pixmap = page.get_pixmap(matrix=matrix)
        pixmap.save(f'/tmp/slide-{i+1:03d}.jpg', output='jpeg')
    doc.close()
+   print(f'Exported {n} slides')
    ```
    **Fallback** (if PyMuPDF unavailable): Read the PDF directly page by page.
 
