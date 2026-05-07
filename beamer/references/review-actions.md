@@ -50,6 +50,21 @@ Visual layout audit. Read-only report.
 4. Reduce image/table size with `\resizebox`
 5. **Last resort:** `\footnotesize` (never `\tiny`)
 
+### Box Justification Rule
+
+A `block` / `alertblock` / `exampleblock` must earn its existence. The default failure mode is wrapping any sentence that *feels* important — "Goal:", "Solution:", "Insight:" — in a colored box, which dilutes emphasis until none of the boxes signal anything.
+
+Use a box ONLY when:
+- The content is genuinely **2+ items** that need *visual containment* to read as a unit, OR
+- The content is a formal `theorem` / `lemma` / `proof` (use the dedicated environment, not `block`).
+
+Do NOT use a box for:
+- Wrapping a single sentence with a label (`Goal:`, `Solution:`, `Observation:`) — use `\textbf{Goal.}` inline at the start of the sentence instead.
+- Wrapping a TikZ diagram (Hard Rule 10 — diagrams overflow box borders silently and the compiler reports nothing).
+- Visually highlighting a result — that's what `\HL{}` and `\rowcolor{positive!10}` are for.
+
+When auditing, count standalone single-sentence boxes per slide. If `> 1`, flag for inline conversion. If a slide has both an `alertblock` and an `exampleblock` containing single sentences, the slide has no real visual hierarchy — the boxes are decoration, not structure.
+
 ---
 
 ## `pedagogy [file]`
@@ -160,7 +175,7 @@ Automated quantitative validation. Checks measurable properties without reading 
    - Count `\pause` / `\onslide` / `\only` usage → must be 0 (Hard Rule 1)
    - Count slides with >2 colored boxes → flag violations (Hard Rule 2)
    - Count `\tiny` usage → must be 0 (Hard Rule 13)
-   - Check for `\begin{thebibliography}` → warn if missing (Hard Rule 11)
+   - Check for `\begin{thebibliography}` → required only when `[duration]` ≥ 15 min (Hard Rule 11). For shorter talks, check for any corner attribution (e.g. `Open code:` / `\href{github.com/`) instead, and only warn if neither is present.
 
 ### Report Format
 

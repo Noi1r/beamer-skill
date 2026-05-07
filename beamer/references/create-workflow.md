@@ -91,6 +91,7 @@ Produce a **detailed outline**. For each section:
 - **Formulas and analysis interleave tightly** — define a quantity, then immediately state its cost/property/implication on the same slide.
 - **No conversational hedging** — never write "wait, not exactly", "actually, let me clarify".
 - **Use `\textbf{}` for key terms** on first introduction; use `\pos{...}` for positive, `\con{...}` for drawbacks, `\HL{...}` for key findings.
+- **Prefer `\begin{align*} ... \end{align*}`** over `\[ ... \]` for display math, even when there's only one line. It generalizes naturally when the user (often) follows up with "加一行" or "把这个推导拆成两行", and most academic users have it in muscle memory. `\[ ... \]` is fine for very short standalone formulas where alignment is irrelevant.
 
 ### 3a-2. Opening and Closing Strategies
 

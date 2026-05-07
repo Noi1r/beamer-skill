@@ -9,7 +9,7 @@ description: |
   Trigger on: beamer, slides, lecture, presentation, seminar talk, conference talk, defense slides,
   tikz, compile latex, proofread slides, slide review, 讨论班, 论文讲解.
   Do NOT trigger on: powerpoint, pptx, PPT, 做PPT — use the powerpoint-slides skill instead.
-argument-hint: "[action] [file] — actions: create, compile, review, audit, pedagogy, tikz, excellence, devils-advocate, visual-check, validate, extract-figures"
+argument-hint: "[action] [file] — actions: create, compile, review, audit, pedagogy, tikz, excellence, devils-advocate, visual-check, validate, extract-figures, tweak, imitate, poster"
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Agent", "AskUserQuestion", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"]
 ---
 
@@ -67,6 +67,22 @@ When creating new slides, use this as the default preamble unless the user has a
 
 ---
 
+## 0.1 MODE SELECTION (read this first)
+
+Real usage is bimodal. Decide which mode you are in **from the user's first message**, and never silently start the wrong workflow:
+
+- **Edit mode** — the deck already exists and the user wants a *local* change. Triggers: short messages (≤ ~80 chars), references to a specific frame ("frame 12", "第 7 页"), relative directional language ("往左一点", "再大一点", "改回去"), color/label/spacing tweaks, or pasting back an earlier version. This is the **majority of real interactions** — go straight to `tweak` (§2.12) and read **only** the targeted frame, not the whole deck.
+
+- **Author mode** — the deck does not exist yet, or the user wants substantial new content. Triggers: "create slides", "make a presentation", "from this paper", "做一个 X 的 slides", "讨论班讲 Y". Run the full `create` workflow (Phase 0–5).
+
+If genuinely unclear, ask **one** question — "想做小修改还是从头创作 slides?" — and wait. Don't assume. Misclassifying author-mode as edit-mode wastes cycles; misclassifying edit-mode as author-mode rewrites work the user has already polished.
+
+Two common false signals:
+- A long pasted block of LaTeX **does not** mean author mode — the user is usually showing you the current state so you can edit *one piece* of it. Read the surrounding instruction carefully.
+- "Make this frame look like the reference" is edit mode + the `imitate` action (§2.13), not author mode.
+
+---
+
 ## 1. HARD RULES (Non-Negotiable)
 
 1. **No overlays** — never use `\pause`, `\onslide`, `\only`, `\uncover`. Use multiple slides for progressive builds, color emphasis for attention. **Common replacement patterns:**
@@ -85,10 +101,15 @@ When creating new slides, use this as the default preamble unless the user has a
     - **Vertical overflow** (most common, hardest to detect): display math (`\[ \]`) + text below it inside a single box easily exceeds vertical capacity. Limit box content to **one display equation OR 2-3 short bullet items** — not both. Never use aggressive `\vspace{-Xpt}` inside a box; it pulls bottom content past the border.
     - **Horizontal overflow**: never use `\qquad` inside a box; use `\quad` or `,`. If a display equation is wider than ~70% of `\textwidth` on a bare slide, reformat before placing inside a box.
     - **Beamer suppresses overfull warnings inside blocks** — zero compile warnings does NOT guarantee no visual overflow. Always visually verify every box in the PDF.
-11. **Reference slide** — the second-to-last slide (before Thank You) must be a **References** slide listing key cited works. Use `\begin{thebibliography}{9}` with `\small`. Include the primary paper and 3-5 most relevant references.
+11. **Reference slide — duration-conditional.** For talks **≥ 15 min** (seminar, defense, lecture), the second-to-last slide (before Thank You) must be a **References** slide listing key cited works (`\begin{thebibliography}{9}` with `\small`, primary paper + 3-5 most relevant). For **≤ 10 min conference talks** (IEEE S&P / CCS / USENIX / NDSS lightning slots), a single corner attribution suffices — e.g. `Open code: \texttt{github.com/.../repo}` in `\scriptsize\color{gray}` at south-east via `tikzpicture[remember picture, overlay]`. **Ask the user before adding a full references slide on short talks** — many short slots explicitly discourage them.
 12. **Color and contrast standards** — text-background contrast ratio ≥ 4.5:1 (WCAG AA). Never use red+green for binary contrasts (color blindness affects ~8% of men). Prefer blue+orange. Semantic color commands defined in preamble: `\pos{}` = positive/correct (blue), `\con{}` = negative/limitation (orange), `\HL{}` = emphasis/key finding (green), `\textcolor{neutral}{}` = de-emphasized. These are color-blind safe. Limit total palette to 3-5 colors.
+    - **Highlight nouns, not phrases.** `\HL{shift t to t+2 over the Mersenne prime field}` is wrong; `shift $\hat t := t+2$ over the \HL{Mersenne prime field}` is right. Color a noun or short noun phrase (≤ 4 words). Never color verbs, conjunctions, or whole clauses — that kills the signal users actually need.
+    - **One role per color across the entire deck.** Once `\HL{}` (green) marks "the key construction step", it cannot also mark "the overall takeaway" two slides later. If a stronger emphasis is needed, add a *fourth* color (`\red{}`, `cbRed = #D62728`) and reserve it for genuine errors / counter-examples.
+    - **Prefer `\textbf{}` over color** for headings *inside* a slide. Color signals "look here for *content*"; bold signals "this is structurally important". They are not interchangeable.
+    - **Max 2 distinct semantic colors active per slide** (in addition to neutral text). More than that and the eye has nowhere to rest.
+    - **`\con` defaults to orange (`#DE8F05`), not red.** When the user says "用红色" in an error / counter-example context, they usually want a true red — define `\definecolor{cbRed}{HTML}{D62728}` and `\newcommand{\red}[1]{\textcolor{cbRed}{#1}}` rather than re-tinting `\con`.
 13. **Visual hierarchy in font sizes** — slide title: 20-24pt (beamer default), key findings/theorems: normal size with `\textbf`, supporting text: normal, labels/captions: `\small` minimum. Never use `\tiny` for any user-facing content.
-14. **Backup slides** — after the Thank You slide, include 3-5 backup slides for anticipated questions. Use `\appendix` before backup section. Separate from main deck with a `\begin{frame}{Backup Slides}\end{frame}` divider. Backup slides should NOT count toward the timing allocation. **Content to include** (derive from Phase 0 material analysis):
+14. **Backup slides — duration-conditional.** Required for **talks ≥ 20 min** and for thesis defenses. For **≤ 15 min talks**, default to **one targeted backup slide** for the most likely question (not 3-5), and only if the paper has a non-trivial proof / experiment / hyperparameter detail likely to be asked. For **≤ 10 min talks**, backup slides are optional — ask the user which 1-2 questions they expect rather than guessing. Always use `\appendix` before backups; backups don't count toward timing. **Content to include** (derive from Phase 0 material analysis):
     - Full proof of the main theorem (if only a sketch was shown in the main deck)
     - Parameter choices / security analysis details (for crypto/protocol papers)
     - Extended comparison table with additional baselines
@@ -102,15 +123,33 @@ When creating new slides, use this as the default preamble unless the user has a
     - Always use `[T]` (top-align) unless deliberately centering.
     - Columns content follows the same density constraints as regular slides.
 
+16. **Parameterize TikZ geometric constants.** For any TikZ diagram with **≥ 3 named nodes** or **≥ 4 explicit coordinates**, hoist *every* layout-affecting number into a named `\def\name{...}` at the top of the `tikzpicture`, and use `\pgfmathsetmacro{\derived}{f(\base)}` for derived values. **Why this matters**: the user will almost always say "P2 往上一点" or "云缩小一点" after seeing the first version. With parameterization, that's a one-line `\def\sideY{...}` change. Without it, you're chasing 8 hardcoded coordinates and the user goes through 4 rounds of "still not aligned". Required parameter set for any flow / interaction diagram:
+    - **Positions**: `\def\sideX{...}`, `\def\sideY{...}`, ring radius `\def\nodeR{...}`
+    - **Sizes**: `\def\nodeRadius{...}`, `\def\boxWidth{...}`
+    - **Spacing**: `\def\arrowSep{...}` (parallel-arrow gap), `\def\labelSep{...}` (label-to-arrow gap), `\def\cloudStopX{...}` (where arrows terminate near rounded shapes)
+    - **Derived**: `\pgfmathsetmacro{\arrowStartR}{sqrt(\nodeRadius^2 - \arrowSep^2)}` etc.
+
+    Apply this rule to **every** interaction / flow / dependency diagram — the ones the user is most likely to ask follow-up tweaks on. A good heuristic: if you can imagine the user saying "X 离 Y 远一点", parameterize the gap.
+
 ---
 
 ## 2. ACTIONS
 
 Parse `$ARGUMENTS` to determine which action to run. If no action specified, ask.
 
-### 2.1 `compile [file]`
+### 2.1 `compile [file] [--full]`
 
-3-pass XeLaTeX + bibtex for full citation resolution.
+**Default: 1-pass incremental.** Tweak loops want results in seconds, not 10s. A single `xelatex -interaction=nonstopmode FILE.tex` is sufficient when no new `\label` / `\cite` / `\ref` were added.
+
+```bash
+xelatex -interaction=nonstopmode FILE.tex
+```
+
+**`--full`: 3-pass XeLaTeX + bibtex.** Required when:
+- New citations added (`.bib` re-resolution)
+- New `\label` / `\ref` added (cross-references)
+- Frame numbers changed and used in `\hyperlink`
+- ToC, list of figures, etc., are present
 
 ```bash
 # Adapt TEXINPUTS/BIBINPUTS to your project's preamble/bib locations
@@ -120,12 +159,14 @@ xelatex -interaction=nonstopmode FILE.tex
 xelatex -interaction=nonstopmode FILE.tex
 ```
 
-Post-compile checks:
+**Auto-decide:** if `git diff` of the .tex shows any added line containing `\cite`, `\label`, `\ref`, or `\bibliography`, use `--full`; otherwise default to 1-pass. **Always report which mode you chose** so the user can override.
+
+Post-compile checks (both modes):
 - Grep log for `Overfull \\hbox` warnings (count and locations)
 - Grep for `Undefined control sequence` or `undefined citations`
-- Grep for `Label(s) may have changed`
-- Open PDF for visual verification
-- Report: success/failure, overfull count, undefined items, page count
+- Grep for `Label(s) may have changed` (1-pass mode: this is expected if `--full` would have been needed; re-run with `--full` if it appears)
+- Open PDF for visual verification (skip if user is mid-tweak loop and just wants confirmation that it built)
+- Report: success/failure, overfull count, undefined items, page count, mode used
 
 ### 2.2 `create [topic]`
 
@@ -862,7 +903,7 @@ Challenge slide design with 5-7 specific pedagogical questions.
    - Count `\pause` / `\onslide` / `\only` usage → must be 0 (Hard Rule 1)
    - Count slides with >2 colored boxes → flag violations (Hard Rule 2)
    - Count `\tiny` usage → must be 0 (Hard Rule 13)
-   - Check for `\begin{thebibliography}` → warn if missing (Hard Rule 11)
+   - Check for `\begin{thebibliography}` → required only when `[duration]` ≥ 15 min (Hard Rule 11). For shorter talks, check for any corner attribution (e.g. `Open code:` / `\href{github.com/`) instead, and only warn if neither is present.
 
 **Report format:**
 ```
@@ -967,6 +1008,70 @@ Use when the user wants to reuse figures from an existing paper (their own or a 
 - **Don't extract tables** — tables from PDF rasterize poorly. Always recreate tables in LaTeX using `booktabs`.
 - **Preamble dependency** — ensure `\usepackage{graphicx}` is in the preamble (add if missing). If using subfigures, also ensure `\usepackage{subcaption}`.
 
+### 2.12 `tweak [file] [frame] [描述]`
+
+**The default action for edit mode (§0.1).** Surgical, single-frame, minimal-edit modifications. Most real interactions are this — not full deck creation. Three rules govern every tweak:
+
+1. **Read-Edit-Verify, not Read-Rewrite-Verify.** Read **only** the targeted frame (from `\begin{frame}` to `\end{frame}`) — not the whole deck. Use `Edit` (exact-string replace), not `Write`, and replace the smallest substring that achieves the change. Do not regenerate the surrounding frame.
+2. **Preserve user-introduced micro-adjustments.** `\vspace{-0.3em}`, `\hspace*{-0.5em}`, `\!`, manual line breaks, custom-defined colors, and commented-out alternatives are usually the user's previous tuning rounds. Treat them as load-bearing — even if they look "redundant", do not clean them up unless the user asks.
+3. **Compile + visually verify the affected frame, immediately.** Don't batch multiple tweaks across frames before recompiling. Cheap iteration loops require fast feedback. Use `compile` (1-pass, §2.1) — `--full` is almost never needed during tweak loops.
+
+**Reporting:** after each tweak, in one line, state exactly what changed and what was preserved. E.g. *"frame 12: scaled the cloud node by ×0.9 via `\def\cloudR{1.6}` (was 1.78); kept `\vspace{-0.4em}` and the `\HL{}` on `MAESTRO`."* This lets the user verify scope without diffing.
+
+**Natural-language interpretation** (中文/English): see `references/tikz-standards.md` → "Natural-Language Adjustment Vocabulary" for the conservative defaults to apply when the user says "再大一点", "往上一点", "拉长", etc. Default to **~10-20% per step**, not 50%.
+
+**Scope ambiguity** — if the user says "改回去" / "变回 X" / "还是 Y 吧", or pastes back an earlier version, jump to §3.5 (Handling User Reversals). Do not "improve" pasted text.
+
+### 2.13 `imitate [target_frame] [reference.pdf:page]`
+
+Replicate the **layout pattern** of a reference page (typically the user's own prior conference slides, or a paper they admire) onto a new or existing frame. Different from `extract-figures` (§2.11) — `extract-figures` reuses the *pixels*; `imitate` reuses the *structure*.
+
+**Workflow:**
+
+1. **Render the reference page** so you can actually see it:
+   ```bash
+   pdftoppm reference.pdf -f PAGE -l PAGE -r 200 /tmp/ref-PAGE.png
+   ```
+   Then `Read` the PNG — Claude is multimodal and can see layout.
+
+2. **Identify the layout schema** in plain English. Examples:
+   - Column split (e.g., "60/40 left text, right figure")
+   - Standout elements (boxed pills, panels, color accents)
+   - Title strategy (single line, two-line, no title)
+   - Density (sparse / dense / table-heavy)
+
+3. **Map to the user's content** — pick which user material maps to each layout slot. State the mapping back to the user before generating code.
+
+4. **Reproduce the schema, not the pixels.** The user wants the *feel*, not photocopying. Don't insert the reference paper's text or figures into the new frame.
+
+5. **Show the empty skeleton first** (`% TODO: ...` placeholders) and get a thumbs-up before filling content. Cheap to revise an outline; expensive to rewrite a fully populated frame.
+
+**Schemas seen in conference deck imitation requests** (use as starting points, not the universe):
+
+- *Two-pill summary* — two `pill` (rounded TikZ box, filled accent color) over two `panel` (rounded box, white fill, itemize). Used for "two prior works" or "two contributions". Pills must be uniform width; panels must be uniform width AND height.
+- *Keynote-style title page* — `\begin{frame}[plain,noframenumbering]` + manual `\Huge\bfseries` + university logos in a `tabular` row (not `\titlepage`). Replaces the default `\titlepage` macro.
+- *Left-figure-right-text columns* — figure column flush with slide edge via `\hspace*{-0.5em}` to push past the default frame margin. Text column gets `[T]` top-align.
+
+### 2.14 `poster [slides_file] [size]`
+
+Convert an existing Beamer slides deck (or a paper) into a `beamerposter` poster. Reuses the slides' theme, colors, macros, and TikZ definitions — the deck and poster should look like siblings.
+
+```latex
+\documentclass[final]{beamer}
+\usepackage[orientation=portrait,size=a1,scale=1.2]{beamerposter}
+% reuse the same theme, colors, \pos / \con / \HL macros, TikZ commands
+```
+
+**Layout:** 2 columns (Madrid-style), each `\begin{frame}...\end{frame}` from the slides becomes a `\begin{block}{title}...\end{block}` cell flowing down a column. Drop the title slide (replace with a `\maketitle`-style header at the top), drop the Thank You / References slides — corner attribution suffices.
+
+**Sizing rules:**
+- Body text: `\large` minimum.
+- Math: standard size — poster viewers stand 1-3 m away, so projector-rules apply.
+- TikZ figures: scale up `~1.5×` from slide size; verify that arrow widths and font sizes scale too (a `\scriptsize` label on a slide becomes invisible on a poster).
+- Block widths: full column; let `beamerposter` handle gaps.
+
+**Compile:** `xelatex` (same as slides). Verify with `pdftoppm -r 100 poster.pdf /tmp/poster_thumb` to confirm the layout reads at thumbnail scale — if it doesn't read at 100px wide, it won't read across a hallway.
+
 ---
 
 ## 3. VERIFICATION PROTOCOL
@@ -980,6 +1085,24 @@ Use when the user wants to reuse figures from an existing paper (their own or a 
 [ ] PDF opens and renders correctly
 [ ] Visual spot-check of modified slides
 ```
+
+---
+
+## 3.5 HANDLING USER REVERSALS
+
+About 1 in 10 user messages is some flavor of "改回去". The user has decided your previous change was wrong; the goal now is to undo cleanly *without* re-introducing earlier issues you already fixed.
+
+**Trigger phrases:** "改回去", "变回 X", "还是 Y 吧", "回到上一稿", "我又改了一下", "撤销刚才的", or pasting back a block of LaTeX that looks like an earlier version.
+
+**Protocol:**
+
+1. **The user's pasted text is authoritative.** Don't "polish" or "fix" it on the way back in. If it has typos or stylistic things you'd improve, note them separately at the end — don't silently change them.
+2. **Use `git diff` (or read the previous .tex) to identify exactly what to revert** — never guess from memory. Show the user the diff if there's any ambiguity.
+3. **Preserve all manual `\vspace{}`, `\hspace{}`, `\hspace*{}`, custom colors, and commented-out alternatives** in the user's pasted version. Those are micro-adjustments the user already paid for; clobbering them is a regression even if the surrounding code is otherwise correct.
+4. **Confirm scope explicitly** before editing: "改回的是 *frame 8* 还是 *整段* 的 styling?" Reversals are usually partial — the user wants one element back, not an entire phase undone.
+5. **After reverting, do not re-suggest the rejected change.** The user has decided. If you genuinely think the reverted state has a problem (e.g. it brings back an overfull hbox), report it as a fact and let the user choose, but don't re-propose the version they just rejected.
+
+A reversal is the user telling you the cost of the previous change exceeded its benefit *for them*. Trust that — your job in this turn is fidelity to their preference, not optimization.
 
 ---
 
@@ -1015,6 +1138,26 @@ Severity: CRITICAL = math wrong. MAJOR = missing assumption. MINOR = could be cl
 **Error:** `Font "XXX" not found` with XeLaTeX
 **Cause:** System font not installed, or wrong font name.
 **Fix:** Use `fc-list | grep "FontName"` to check available fonts. Fall back to default Latin Modern if custom font unavailable.
+
+**Error:** `\mathbf{X}` looks visibly different from the surrounding math font (mismatched glyphs / weight)
+**Cause:** With OTF math fonts loaded via `unicode-math` (e.g. `concmath-otf`, `stix2-math`, `lm-math`), `\mathbf` defaults to upright bold in the *text* font, not the math font. The italic-bold variant of the math font has to be explicitly enabled.
+**Fix priority:**
+1. Use `\symbf{X}` (from `unicode-math`) instead of `\mathbf{X}` — it's the matched bold for the loaded math font.
+2. Configure `unicode-math` explicitly: `\setmathfont{...}[BoldFont={...}, BoldFeatures={...}]`.
+3. Fallback macro: `\renewcommand{\mathbf}[1]{\boldsymbol{#1}}` to use the math italic bold.
+
+Verify with a tiny test file: `$x \mathbf{x} \symbf{x} \boldsymbol{x}$` side-by-side. They should render at the same weight in the same family.
+
+**User error:** Compiled with `pdflatex` instead of `xelatex` and the deck looks subtly wrong (Hard Rule 5)
+**Cause:** Custom `.sty` files designed for XeLaTeX silently misbehave under `pdflatex` — fonts substitute, `\setmainfont` is undefined, etc.
+**Prevention** — emit a load-time warning in custom theme files:
+```latex
+\RequirePackage{iftex}
+\ifPDFTeX
+  \PackageWarningNoLine{mytheme}{This theme is designed for XeLaTeX or LuaLaTeX. pdflatex may render fonts incorrectly.}
+\fi
+```
+Add this to any `\ProvidesPackage` custom theme so future users (or future you) get an immediate prompt rather than a silent visual regression.
 
 **Error:** Equations overflow slide width
 **Cause:** Long multi-term equation.

@@ -10,8 +10,11 @@ Full lifecycle: **create → compile → review → polish → verify.**
 
 | Action | Description |
 |--------|-------------|
-| `create [topic]` | Collaborative, iterative lecture creation with phase gates (material analysis → needs interview → structure plan → draft → quality loop) |
-| `compile [file]` | 3-pass XeLaTeX + bibtex with post-compile diagnostics |
+| `create [topic]` | Author mode. Collaborative, iterative lecture creation with phase gates (material analysis → needs interview → structure plan → draft → quality loop) |
+| `tweak [file] [frame]` | Edit mode default. Surgical single-frame edit — read only the targeted frame, smallest-possible patch, preserve user-introduced micro-adjustments |
+| `imitate [frame] [ref.pdf:page]` | Replicate the *layout schema* of a reference page (typically a prior conference deck), not the pixels |
+| `poster [slides] [size]` | Convert an existing slides deck into a `beamerposter` poster, reusing theme/colors/macros |
+| `compile [file] [--full]` | 1-pass XeLaTeX by default; `--full` (3-pass + bibtex) only when `\cite`/`\label`/`\ref` were added |
 | `review [file]` | Read-only proofreading report (grammar, typos, overflow, consistency, academic quality) |
 | `audit [file]` | Visual layout audit (overflow, fonts, boxes, spacing) |
 | `pedagogy [file]` | Holistic pedagogical review with 13 validation patterns |
@@ -24,6 +27,11 @@ Full lifecycle: **create → compile → review → polish → verify.**
 
 ### Highlights
 
+- **Bimodal mode selection** — distinguishes "edit mode" (most real interactions: single-frame tweaks, directional adjustments, reversals) from "author mode" (full deck creation), so single-frame tweaks don't trigger a full Phase 0–5 workflow
+- **Surgical `tweak` action** — read only the target frame, smallest-possible patch, preserves the user's `\vspace`/`\hspace`/colors that look "redundant" but are previous tuning rounds
+- **Natural-language adjustment vocabulary** — calibrated defaults for vague directional language ("再大一点" ≈ ×1.10, "往上一点" ≈ +3 mm) with same-direction "再" semantics
+- **Parameterized TikZ diagrams** — Hard Rule 16 requires hoisting layout constants into `\def`s so "P2 往上一点" is a one-line change, not eight hardcoded coordinates
+- **Reversal protocol** — `git diff`-driven undo that preserves the user's pasted text verbatim and never re-suggests rejected changes
 - **Quality scoring system** — automated rubric (start at 100, deduct per issue) with Excellent/Good/Needs Work/Poor thresholds
 - **No overlays** — no `\pause`, `\onslide`, `\only`. Uses multiple slides and color emphasis instead
 - **Content density guards** — upper bounds (7 bullets, 2 equations, 5 symbols per slide) and lower bounds (every slide earns its place)

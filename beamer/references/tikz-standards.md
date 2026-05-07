@@ -194,3 +194,34 @@ for i in $(seq 1 $PAGES); do
   pdf2svg extract_tikz.pdf tikz_exact_$idx.svg $i
 done
 ```
+
+---
+
+## Natural-Language Adjustment Vocabulary (中文 / English)
+
+The single biggest source of wasted tweak rounds is over-interpreting vague directional language. When the user says "再大一点" / "往上一点" / "拉长", they almost always mean **~10-20%**, not 50%. The "再" particle (or "more" / "again") in a follow-up means **same direction, same step size** — not "the previous change was insufficient, escalate".
+
+Use these conservative defaults on the **first** application; the user's follow-up tells you whether to add another step or revert.
+
+| User says | First try | If user says "more" / "再...一点" | If user says "too much" / 太多了 |
+|-----------|-----------|----------------------------------|----------------------------------|
+| 大一点 / bigger / larger | scale × 1.10 | × 1.20 | revert, then × 1.05 |
+| 小一点 / smaller | scale × 0.90 | × 0.80 | revert, then × 0.95 |
+| 往左 / 上 / 下 / 右一点 | xshift / yshift = ±3 mm | ±6 mm | revert, then ±1.5 mm |
+| 拉长 (an arrow / line) | extend endpoint by +0.5 cm | +1.0 cm | revert, then +0.25 cm |
+| 缩短 | -0.5 cm | -1.0 cm | revert, then -0.25 cm |
+| 距离大 / 小一点 (between two nodes) | gap × 1.25 / × 0.80 | × 1.5 / × 0.66 | revert |
+| 字大 / 小一点 (label or node text, one step) | font size step ±1 (e.g. `\small` → `\normalsize`) | ±2 steps | revert |
+| 重叠了 / overlap | add 4 mm clearance via `xshift` / `yshift` | 8 mm | reduce to 2 mm |
+
+### Disciplines that prevent regression
+
+1. **Change one element, not the whole picture.** When the user says "节点放大一点", change *that node's* `minimum size` or font, not the surrounding `[scale=...]` — global scaling silently drags other nodes off-position and triggers a chain of "still not aligned" follow-ups.
+2. **One step at a time.** The user's "再" / "more" is the signal to add a second step; don't pre-empt it on the first try with a 30% jump.
+3. **Don't clean up `\vspace{-0.3em}` and similar micro-edits.** Those are previous tuning rounds. Looking redundant ≠ being redundant.
+4. **Use parameters, not literals.** If the diagram has a `\def\sideY{...}` (Hard Rule 16), tweak that — and only that. If it doesn't, that's a sign the diagram should be parameterized *before* the second tweak round, not patched in place.
+5. **Default to "center of the user's intent", not "center of the slide".** If the user says "图往右移一点", they mean relative to its current position, not to the slide center.
+
+### When to ask before acting
+
+If a single instruction is genuinely ambiguous between *one element* and *the whole figure*, ask one question — "你是想动 *X 元素* 还是 *整张图*?" — rather than guess. One clarifying turn beats two revert rounds.
