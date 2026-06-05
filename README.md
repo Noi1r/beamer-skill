@@ -32,6 +32,7 @@ Full lifecycle: **create → compile → review → polish → verify.**
 - **TikZ precision** — mathematical accuracy enforced via `\pgfmathsetmacro` (no hardcoded approximations)
 - **Semantic color system** — colorblind-safe palette (`\pos{}`, `\con{}`, `\HL{}`) with WCAG AA contrast (≥ 4.5:1)
 - **Figure extraction** — pull figures directly from paper PDFs via `pdf-mcp`, ready for `\includegraphics`
+- **Markdown paper input** — use `.md` as a clean intermediate when PDF parsing loses structure; keep the PDF available for figures
 - **Timing allocation** — built-in slide-count heuristics for 5min lightning talks through 90min lectures
 - **Columns & layout rules** — enforced `columns[T]` patterns with gap/width constraints
 - **Backup slides** — automatic appendix section for anticipated Q&A
@@ -165,6 +166,13 @@ Once installed, the skill is triggered automatically when you mention beamer, sl
 ```
 Help me create a beamer presentation based on this paper: /path/to/paper.pdf
 ```
+
+**Create from converted Markdown (recommended when PDF parsing is weak):**
+```
+Help me create a beamer presentation based on this paper markdown: /path/to/paper.md
+```
+
+Markdown often preserves section hierarchy, equations, captions, and references better than direct PDF reading. If PDF parsing loses structure, first convert the paper to Markdown with MinerU or another PDF-to-Markdown tool, then pass the `.md` file to `create`. This is optional; MinerU is not a required dependency. Keep the original PDF available when you need figure extraction or page-level visual reference.
 
 **Extract figures from a paper:**
 ```

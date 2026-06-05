@@ -82,7 +82,7 @@ Start at 100. Deduct: compilation failure (-100), equation overflow (-20), TikZ 
 
 ## Create Workflow
 
-1. **Phase 0**: Read papers/materials thoroughly
+1. **Phase 0**: Read papers/materials thoroughly; prefer `.md` for semantic structure when available, and use PDF for figures/visual reference
 2. **Phase 1**: Needs interview (duration, audience, scope — 3-6 questions)
 3. **Phase 2**: Structure plan — user must approve before drafting
 4. **Phase 3**: Draft in 5-10 slide batches with self-checks
