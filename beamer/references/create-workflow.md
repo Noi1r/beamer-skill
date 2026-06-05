@@ -8,6 +8,10 @@ This document contains the complete `create [topic]` workflow for the Beamer ski
 
 **Read first, ask later.** Must understand the content before asking meaningful questions.
 
+- Accept `.pdf`, `.md`, or mixed paper/material inputs.
+- If Markdown is provided, use it as the primary semantic source for section hierarchy, equations, theorem statements, captions, references, and notation.
+- If both Markdown and PDF are provided, use Markdown for structure/text understanding and use the PDF for figures, page context, visual reference, and extraction.
+- If only a PDF is provided and parsing loses structure, ask whether the user can provide a Markdown conversion. Do not require or run a specific PDF-to-Markdown converter.
 - Read the full paper/materials thoroughly
 - Extract: core contribution, key techniques, main theorems, comparison with prior work
 - Map notation conventions

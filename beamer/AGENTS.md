@@ -119,6 +119,7 @@ See `references/create-workflow.md` for the complete Phase 0-5 workflow, includi
 - Phase 5: Quality loop (compile → self-review → score → fix, iterative)
 
 **Key constraints during creation:**
+- Material input: `.md` is supported. When Markdown and PDF are both provided, use Markdown for semantic structure/text and the PDF for figures, page context, and visual reference. If PDF parsing is weak, suggest optional PDF-to-Markdown conversion rather than requiring it.
 - Slide count heuristic: ~1 slide per 1.5-2 min
 - Content density: ≤ 7 bullets, ≤ 2 equations, ≤ 5 new symbols, ≤ 2 colored boxes per slide
 - Lower bounds: each slide needs at least one substantive element; pure text-only ≤ 30% of deck
