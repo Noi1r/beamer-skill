@@ -894,18 +894,19 @@ Use when the user wants to reuse figures from an existing paper (their own or a 
 
 #### Workflow
 
-1. **Identify target figures** — if user doesn't specify pages, use `mcp__pdf-mcp__pdf_get_toc` and `mcp__pdf-mcp__pdf_read_pages` to locate figures in the paper. Ask user which figures to extract if ambiguous.
+1. **Identify target figures** — if user doesn't specify pages, use the native `Read` tool (with the `pages` parameter) to view the PDF and locate figures. Ask user which figures to extract if ambiguous.
 
-2. **Extract images** from specified pages:
+2. **Extract images** from specified pages with `pdftoppm` (poppler):
+   ```bash
+   # Render each target page to a high-res PNG (300 dpi), saved to figures/
+   pdftoppm -png -r 300 -f PAGE -l PAGE PDF_PATH figures/page
+   # → figures/page-PAGE.png  (original resolution at the chosen dpi, zero token cost)
    ```
-   mcp__pdf-mcp__pdf_extract_images(path=PDF_PATH, pages=PAGES, output_dir="figures")
-   ```
-   Uses `output_dir` to save images directly to `figures/` as PNG files (original resolution, zero token cost).
-   Returns `{page, index, width, height, format, file_path}` metadata only — no base64 data.
+   Renders the whole page; crop down to the figure with `trim`/`clip` in step 5. For a single clean embedded bitmap, `pdfimages -png -f PAGE -l PAGE PDF_PATH figures/img` extracts the raw image object directly.
 
 3. **Rename to descriptive names** following the naming convention:
    ```bash
-   mv figures/page3_img0.png figures/fig-LABEL.png
+   mv figures/page-3.png figures/fig-LABEL.png
    ```
    Naming convention: `fig-<descriptive-label>.png` (e.g., `fig-architecture.png`, `fig-results-table.png`).
 
@@ -959,7 +960,7 @@ Use when the user wants to reuse figures from an existing paper (their own or a 
    ```latex
    \includegraphics[width=0.85\textwidth, trim=LEFT BOTTOM RIGHT TOP, clip]{figures/fig-LABEL.png}
    ```
-   - Units are in `bp` (big points). Estimate from the image dimensions returned by `pdf_extract_images`.
+   - Units are in `bp` (big points). Estimate from the rendered image dimensions (e.g. `sips -g pixelWidth -g pixelHeight figures/fig-LABEL.png`).
    - Common case: `trim=50 200 50 100, clip` to remove page margins and surrounding text.
    - **Always visually verify** after compilation — cropping coordinates are estimates.
 
